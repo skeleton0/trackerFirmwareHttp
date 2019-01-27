@@ -59,7 +59,7 @@ class Sim7kInterface {
 
   bool setBearerApn(const char* apn);
   bool openBearer();
-  BearerStatus queryBearer();
+  BearerStatus getBearerStatus();
   
   private:
   void sendCommand(const char* command);

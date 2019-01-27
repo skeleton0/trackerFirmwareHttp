@@ -313,7 +313,7 @@ bool Sim7kInterface::openBearer() {
   return checkNextResponse("OK");
 }
 
-Sim7kInterface::BearerStatus Sim7kInterface::queryBearer() {
+Sim7kInterface::BearerStatus Sim7kInterface::getBearerStatus() {
   sendCommand("AT+SAPBR=2,1");
   
   if (!readLineFromUart() || strlen(mRxCache) < 10) {
@@ -322,9 +322,9 @@ Sim7kInterface::BearerStatus Sim7kInterface::queryBearer() {
 
   BearerStatus status;
   
-  //format of response is +SAPBR:<cid>,<Status>,<IP_Addr>
-  //the 9th character refers to the status code which is [0,3]
-  switch (mRxCache[9]) {
+  //format of response is +SAPBR: <cid>,<Status>,<IP_Addr>
+  //the 10th character refers to Status which is in the range [0,3]
+  switch (mRxCache[10]) {
     case '0':
     status = BearerStatus::CONNECTING;
     break;
