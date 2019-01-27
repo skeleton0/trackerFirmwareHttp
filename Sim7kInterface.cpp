@@ -353,6 +353,61 @@ Sim7kInterface::BearerStatus Sim7kInterface::getBearerStatus() {
   return status;
 }
 
+bool Sim7kInterface::initHttp() {
+  sendCommand("AT+HTTPINIT");
+
+  return checkNextResponse("OK");
+}
+
+bool Sim7kInterface::setHttpUrl(const char* url) {
+  if (strlen(url) > 50) {
+    writeToLog(F("URL is too long."));
+    return false;
+  }
+
+  char command[71] = "AT+HTTPPARA=\"URL\",\"";
+  strcat(command, url);
+  strcat(command, "\"");
+
+  sendCommand(command);
+
+  return checkNextResponse("OK");
+}
+
+bool Sim7kInterface::sendHttpGnssUpdate(const char* id) {
+  //build payload in the format of id,timestamp,lat,lon,sog,cog
+  char payload[60] = {};
+  strncat(payload, id, 3);
+  strcat(payload, ",");
+  strcat(payload, mGnssCache.mTimestamp);
+  strcat(payload, ",");
+  strcat(payload, mGnssCache.mLatitude);
+  strcat(payload, ",");
+  strcat(payload, mGnssCache.mLongitude);
+  strcat(payload, ",");
+  strcat(payload, mGnssCache.mSpeedOverGround);
+  strcat(payload, ",");
+  strcat(payload, mGnssCache.mCourseOverGround);
+
+  writeToLog(F("HTTP payload to be sent to server: "));
+  writeToLog(payload);
+
+  char command[22];
+  const size_t msgLen{strlen(payload)};
+  sprintf(command, "AT+HTTPDATA=%d,5000", msgLen);
+
+  sendCommand(command);
+
+  if (!checkNextResponse("DOWNLOAD")) {
+    return false;
+  }
+
+  mUartStream.write(payload);
+  //mUartStream.write(0x1A); //communicates end of msg to sim7k
+
+  return checkNextResponse("OK"); 
+}
+
 void Sim7kInterface::sendCommand(const char* command) {
   flushUart();
   

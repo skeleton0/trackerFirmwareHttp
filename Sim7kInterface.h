@@ -61,6 +61,10 @@ class Sim7kInterface {
   bool openBearer();
   BearerStatus getBearerStatus();
   
+  bool initHttp();
+  bool setHttpUrl(const char* url);
+  bool sendHttpGnssUpdate(const char* id);
+  
   private:
   void sendCommand(const char* command);
   bool readLineFromUart(const uint32_t timeout = 5000);
