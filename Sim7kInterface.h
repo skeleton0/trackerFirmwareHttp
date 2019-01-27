@@ -35,6 +35,14 @@ class Sim7kInterface {
     MODEM_OFF,
   };
 
+  enum class BearerStatus {
+    CONNECTING,
+    CONNECTED,
+    CLOSING,
+    CLOSED,
+    ERROR,
+  };
+
   bool turnOn();
   bool turnOff();
   bool isOn();
@@ -48,6 +56,10 @@ class Sim7kInterface {
   bool cipstart(const char* protocol, const char* address, const char* port);
   bool sendGnssUpdate(const char* id);
   ConnectionState queryConnectionState();
+
+  bool setBearerApn(const char* apn);
+  bool openBearer();
+  BearerStatus queryBearer();
   
   private:
   void sendCommand(const char* command);

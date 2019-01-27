@@ -291,6 +291,68 @@ Sim7kInterface::ConnectionState Sim7kInterface::queryConnectionState() {
   return ConnectionState::MODEM_OFF;
 }
 
+bool Sim7kInterface::setBearerApn(const char* apn) {
+  const size_t maxApnLen{10};
+  if (strnlen(apn, maxApnLen) == maxApnLen) {
+    writeToLog(F("Apn is too long."));
+    return false;
+  }
+  
+  char command[32] = "AT+SAPBR=3,1,\"APN\",\"";
+  strcat(command, apn);
+  strcat(command, "\"");
+
+  sendCommand(command);
+  
+  return checkNextResponse("OK");
+}
+
+bool Sim7kInterface::openBearer() {
+  sendCommand("AT+SAPBR=1,1");
+
+  return checkNextResponse("OK");
+}
+
+Sim7kInterface::BearerStatus Sim7kInterface::queryBearer() {
+  sendCommand("AT+SAPBR=2,1");
+  
+  if (!readLineFromUart() || strlen(mRxCache) < 10) {
+    return BearerStatus::ERROR;
+  }
+
+  BearerStatus status;
+  
+  //format of response is +SAPBR:<cid>,<Status>,<IP_Addr>
+  //the 9th character refers to the status code which is [0,3]
+  switch (mRxCache[9]) {
+    case '0':
+    status = BearerStatus::CONNECTING;
+    break;
+    
+    case '1':
+    status = BearerStatus::CONNECTED;
+    break;
+    
+    case '2':
+    status = BearerStatus::CLOSING;
+    break;
+
+    case '3':
+    status = BearerStatus::CLOSED;
+    break;
+
+    default:
+    status = BearerStatus::ERROR;
+    break;
+  }
+
+  if (!checkNextResponse("OK")) {
+    status = BearerStatus::ERROR;
+  }
+
+  return status;
+}
+
 void Sim7kInterface::sendCommand(const char* command) {
   flushUart();
   
