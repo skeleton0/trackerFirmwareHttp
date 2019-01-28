@@ -405,7 +405,13 @@ bool Sim7kInterface::sendHttpGnssUpdate(const char* id) {
   mUartStream.write(payload);
   //mUartStream.write(0x1A); //communicates end of msg to sim7k
 
-  return checkNextResponse("OK"); 
+  if (!checkNextResponse("OK")) {
+    return false; 
+  }
+
+  sendCommand("AT+HTTPACTION=1");
+
+  return checkNextResponse("OK");
 }
 
 void Sim7kInterface::sendCommand(const char* command) {
