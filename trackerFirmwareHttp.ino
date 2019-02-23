@@ -2,13 +2,16 @@
 #include "Config.h"
 
 Sim7kInterface* sim7k{nullptr};
-Sim7kInterface::BearerStatus status{Sim7kInterface::BearerStatus::ERROR};
 unsigned long timer{0};
 
 void setup() {
   Serial.begin(4800);
   sim7k = new Sim7kInterface(&Serial);
-  status = sim7k->getBearerStatus();
+
+  sim7k->turnOn();
+  sim7k->turnOnGnss();
+  sim7k->initHttps();
+  sim7k->setHttpsUrl("https://"SERVER_ADDR":"SERVER_PORT);
   
   timer = millis();
 
@@ -16,33 +19,15 @@ void setup() {
   timer += SITTING_UPDATE_FREQUENCY;
 }
 
-void loop() { 
-  switch (status)
-  { 
-    case Sim7kInterface::BearerStatus::ERROR:
-    sim7k->turnOff();
-    delay(1000);
-    sim7k->turnOn();
-    sim7k->turnOnGnss();
-    status = sim7k->getBearerStatus();
-    break;
+void loop() {
+  sim7k->activateNetwork(APN);
 
-    case Sim7kInterface::BearerStatus::CLOSED:
-    if (!sim7k->setBearerApn(APN) || !sim7k->openBearer() || 
-        !sim7k->initHttp() || !sim7k->setHttpUrl("http://"SERVER_ADDR":"SERVER_PORT)) {
-      status = Sim7kInterface::BearerStatus::ERROR;
-    } else {
-      status = sim7k->getBearerStatus();
-    }
-    break;
+  if (!sim7k->networkIsActive()) {
+    return;
+  }
 
-    case Sim7kInterface::BearerStatus::CONNECTED:
-    if (!handlePositionUpdate()) {
-      status = sim7k->getBearerStatus();
-    } else {
-      delay(MOVING_UPDATE_FREQUENCY);
-    }
-    break;
+  while (handlePositionUpdate()) {
+    delay(MOVING_UPDATE_FREQUENCY);
   }
 }
 
@@ -63,7 +48,10 @@ bool handlePositionUpdate() {
   }
 
   if (sendUpdate) {
-    if (!sim7k->sendHttpGnssUpdate(DEVICE_ID)) {
+    sim7k->setHttpsBodyToGnssUpdate(DEVICE_ID);
+    sim7k->startHttpsConn();
+    
+    if (!sim7k->httpsIsConn() || !sim7k->sendHttpsPost("https://"SERVER_ADDR":"SERVER_PORT)) {
       return false;
     }
     
