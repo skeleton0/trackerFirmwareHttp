@@ -307,6 +307,18 @@ bool Sim7kInterface::activateNetwork(const char* apn) {
   return checkNextResponse("+APP PDP: ACTIVE");
 }
 
+bool Sim7kInterface::networkIsActive() {
+  sendCommand("AT+CNACT?");
+
+  readLineFromUart();
+
+  if (strlen(mRxCache) < 11) {
+    return false;
+  }
+
+  return mRxCache[8] == '1';
+}
+
 bool Sim7kInterface::setBearerApn(const char* apn) {
   const size_t maxApnLen{10};
   if (strnlen(apn, maxApnLen) == maxApnLen) {

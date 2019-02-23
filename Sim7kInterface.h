@@ -58,6 +58,8 @@ class Sim7kInterface {
   ConnectionState queryConnectionState();
 
   bool activateNetwork(const char* apn);
+  bool networkIsActive();
+  
   bool setBearerApn(const char* apn);
   bool openBearer();
   BearerStatus getBearerStatus();
