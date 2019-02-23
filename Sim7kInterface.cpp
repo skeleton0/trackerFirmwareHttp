@@ -319,6 +319,40 @@ bool Sim7kInterface::networkIsActive() {
   return mRxCache[8] == '1';
 }
 
+bool Sim7kInterface::initHttps() {
+  //enable TLS 1.2
+  sendCommand("AT+CSSLCFG=\"sslversion\",0,3");
+
+  if (!checkNextResponse("OK")) {
+    return false;
+  }
+
+  sendCommand("AT+SHCONF=\"BODYLEN\",350");
+
+  if (!checkNextResponse("OK")) {
+    return false;
+  }
+
+  sendCommand("AT+SHCONF=\"HEADERLEN\",350");
+
+  return checkNextResponse("OK");
+}
+
+bool Sim7kInterface::setHttpsUrl(const char* url) {
+  if (strnlen(url, URL_LEN_LIMIT) == URL_LEN_LIMIT) {
+    writeToLog(F("URL length exceeded the maximum of 64 bytes."));
+    return false;
+  }
+
+  char command[83] = "AT+SHCONF=\"URL\", \"";
+  strcat(command, url);
+  strcat(command, "\"");
+
+  sendCommand(command);
+
+  return checkNextResponse("OK");
+}
+
 bool Sim7kInterface::setBearerApn(const char* apn) {
   const size_t maxApnLen{10};
   if (strnlen(apn, maxApnLen) == maxApnLen) {

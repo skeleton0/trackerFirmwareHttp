@@ -6,6 +6,7 @@
 #define LON_SIZE 12
 #define SOG_SIZE 7
 #define COG_SIZE 7
+#define URL_LEN_LIMIT 65
 
 class HardwareSerial;
 
@@ -59,6 +60,10 @@ class Sim7kInterface {
 
   bool activateNetwork(const char* apn);
   bool networkIsActive();
+
+  bool initHttps();
+  bool setHttpsUrl(const char* url);
+
   
   bool setBearerApn(const char* apn);
   bool openBearer();
