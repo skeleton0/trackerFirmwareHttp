@@ -353,6 +353,12 @@ bool Sim7kInterface::setHttpsUrl(const char* url) {
   return checkNextResponse("OK");
 }
 
+bool Sim7kInterface::startHttpsConn() {
+  sendCommand("AT+SHCONN");
+
+  return checkNextResponse("OK", 10000);
+}
+
 bool Sim7kInterface::setBearerApn(const char* apn) {
   const size_t maxApnLen{10};
   if (strnlen(apn, maxApnLen) == maxApnLen) {
