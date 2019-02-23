@@ -365,6 +365,56 @@ bool Sim7kInterface::httpsIsConn() {
   return checkNextResponse("+SHSTATE: 1");
 }
 
+bool Sim7kInterface::setHttpsBodyToGnssUpdate(const char* id) {
+  char body[BODY_LEN_LIMIT] = "";
+  strcat(body, id);
+  strcat(body, ",");
+  strcat(body, mGnssCache.mTimestamp);
+  strcat(body, ",");
+  strcat(body, mGnssCache.mLatitude);
+  strcat(body, ",");
+  strcat(body, mGnssCache.mLongitude);
+  strcat(body, ",");
+  strcat(body, mGnssCache.mSpeedOverGround);
+  strcat(body, ",");
+  strcat(body, mGnssCache.mCourseOverGround);
+
+  auto bodyLen = strnlen(body, BODY_LEN_LIMIT);
+
+  if (bodyLen == BODY_LEN_LIMIT) {
+    writeToLog(F("Body length exceeds the maximum of 350 bytes."));
+    return false;
+  }
+
+  char command[366];
+  sprintf(command, "AT+SHBOD=\"%s\",%d", body, bodyLen);
+
+  sendCommand(command);
+
+  return checkNextResponse("OK");
+}
+
+bool Sim7kInterface::sendHttpsPost(const char* url) {
+  if (strnlen(url, URL_LEN_LIMIT) == URL_LEN_LIMIT) {
+    writeToLog(F("URL length exceeded the maximum of 64 bytes."));
+    return false;
+  }
+  
+  char command[75] = "AT+SHREQ=\"";
+  strcat(command, url);
+  strcat(command, "\",3");
+
+  sendCommand(command);
+
+  readLineFromUart();
+
+  if (strlen(mRxCache) < 20) {
+    return false; 
+  }
+
+  return strncmp(mRxCache, "AT+SHREQ=\"POST\",302", 19) == 0;
+}
+
 bool Sim7kInterface::setBearerApn(const char* apn) {
   const size_t maxApnLen{10};
   if (strnlen(apn, maxApnLen) == maxApnLen) {
