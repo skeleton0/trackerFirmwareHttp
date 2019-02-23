@@ -57,6 +57,7 @@ class Sim7kInterface {
   bool sendGnssUpdate(const char* id);
   ConnectionState queryConnectionState();
 
+  bool activateNetwork(const char* apn);
   bool setBearerApn(const char* apn);
   bool openBearer();
   BearerStatus getBearerStatus();

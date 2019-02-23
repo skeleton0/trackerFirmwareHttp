@@ -291,6 +291,22 @@ Sim7kInterface::ConnectionState Sim7kInterface::queryConnectionState() {
   return ConnectionState::MODEM_OFF;
 }
 
+bool Sim7kInterface::activateNetwork(const char* apn) {
+  const size_t maxApnLen{10};
+  if (strnlen(apn, maxApnLen) == maxApnLen) {
+    writeToLog(F("Apn is too long."));
+    return false;
+  }
+
+  char command[24] = "AT+CNACT=1,\"";
+  strcat(command, apn);
+  strcat(command, "\"");
+
+  sendCommand(command);
+
+  return checkNextResponse("+APP PDP: ACTIVE");
+}
+
 bool Sim7kInterface::setBearerApn(const char* apn) {
   const size_t maxApnLen{10};
   if (strnlen(apn, maxApnLen) == maxApnLen) {
