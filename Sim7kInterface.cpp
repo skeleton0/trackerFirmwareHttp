@@ -359,6 +359,12 @@ bool Sim7kInterface::startHttpsConn() {
   return checkNextResponse("OK", 10000);
 }
 
+bool Sim7kInterface::httpsIsConn() {
+  sendCommand("AT+SHSTATE?");
+
+  return checkNextResponse("+SHSTATE: 1");
+}
+
 bool Sim7kInterface::setBearerApn(const char* apn) {
   const size_t maxApnLen{10};
   if (strnlen(apn, maxApnLen) == maxApnLen) {
