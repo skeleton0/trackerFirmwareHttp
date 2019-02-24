@@ -365,6 +365,12 @@ bool Sim7kInterface::httpsIsConn() {
   return checkNextResponse("+SHSTATE: 1");
 }
 
+bool Sim7kInterface::setHttpsContentType() {
+  sendCommand("AT+SHAHEAD=\"Content-Type\",\"text/csv; charset=utf-8\"");
+
+  return checkNextResponse("OK");
+}
+
 bool Sim7kInterface::setHttpsBodyToGnssUpdate(const char* id) {
   char body[BODY_LEN_LIMIT] = "";
   strcat(body, id);

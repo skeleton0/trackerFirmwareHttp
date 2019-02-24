@@ -66,7 +66,9 @@ class Sim7kInterface {
   bool setHttpsUrl(const char* url);
   bool startHttpsConn();
   bool httpsIsConn();
+  bool setHttpsContentType();
   bool setHttpsBodyToGnssUpdate(const char* id);
+  
   bool sendHttpsPost(const char* url);
   
   bool setBearerApn(const char* apn);

@@ -48,8 +48,9 @@ bool handlePositionUpdate() {
   }
 
   if (sendUpdate) {
-    sim7k->setHttpsBodyToGnssUpdate(DEVICE_ID);
     sim7k->startHttpsConn();
+    sim7k->setHttpsContentType();
+    sim7k->setHttpsBodyToGnssUpdate(DEVICE_ID);
     
     if (!sim7k->httpsIsConn() || !sim7k->sendHttpsPost("https://"SERVER_ADDR":"SERVER_PORT)) {
       return false;
