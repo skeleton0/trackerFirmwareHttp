@@ -412,13 +412,7 @@ bool Sim7kInterface::sendHttpsPost(const char* url) {
 
   sendCommand(command);
 
-  readLineFromUart();
-
-  if (strlen(mRxCache) < 20) {
-    return false; 
-  }
-
-  return strncmp(mRxCache, "AT+SHREQ=\"POST\",302", 19) == 0;
+  return checkNextResponse("AT+SHREQ: \"POST\",404,9", 10000);
 }
 
 bool Sim7kInterface::setBearerApn(const char* apn) {
