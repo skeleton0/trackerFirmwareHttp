@@ -416,7 +416,7 @@ bool Sim7kInterface::sendHttpsPost(const char* url) {
 
   sendCommand(command);
 
-  return checkNextResponse("AT+SHREQ: \"POST\",404,9", 10000);
+  return checkNextResponse("OK") && checkNextResponse("+SHREQ: \"POST\",404,9", 30000);
 }
 
 bool Sim7kInterface::setBearerApn(const char* apn) {
