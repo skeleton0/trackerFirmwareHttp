@@ -56,6 +56,7 @@ bool handlePositionUpdate() {
     timer = millis();
   } else {
     writeToLog(F("Update failed."));
+    sim7k->disconnHttps();
   }
 
   return updateSuccess;

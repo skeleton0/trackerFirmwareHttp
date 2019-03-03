@@ -65,6 +65,7 @@ class Sim7kInterface {
   bool initHttps();
   bool setHttpsUrl(const char* url);
   bool startHttpsConn();
+  bool disconnHttps();
   bool httpsIsConn();
   bool setHttpsContentType();
   bool setHttpsBodyToGnssUpdate(const char* id);

@@ -359,6 +359,12 @@ bool Sim7kInterface::startHttpsConn() {
   return checkNextResponse("OK", 10000);
 }
 
+bool Sim7kInterface::disconnHttps() {
+  sendCommand("AT+SHDISC");
+
+  return checkNextResponse("OK");
+}
+
 bool Sim7kInterface::httpsIsConn() {
   sendCommand("AT+SHSTATE?");
 
