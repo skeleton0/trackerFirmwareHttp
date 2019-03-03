@@ -372,29 +372,27 @@ bool Sim7kInterface::setHttpsContentType() {
 }
 
 bool Sim7kInterface::setHttpsBodyToGnssUpdate(const char* id) {
-  char body[BODY_LEN_LIMIT] = "";
-  strcat(body, id);
-  strcat(body, ",");
-  strcat(body, mGnssCache.mTimestamp);
-  strcat(body, ",");
-  strcat(body, mGnssCache.mLatitude);
-  strcat(body, ",");
-  strcat(body, mGnssCache.mLongitude);
-  strcat(body, ",");
-  strcat(body, mGnssCache.mSpeedOverGround);
-  strcat(body, ",");
-  strcat(body, mGnssCache.mCourseOverGround);
-
-  auto bodyLen = strnlen(body, BODY_LEN_LIMIT);
-
-  if (bodyLen == BODY_LEN_LIMIT) {
-    writeToLog(F("Body length exceeds the maximum of 350 bytes."));
+  if (strnlen(id, ID_SIZE) == ID_SIZE) {
+    writeToLog(F("ID length exceeds maximum limit."));
     return false;
   }
 
-  char command[366];
-  sprintf(command, "AT+SHBOD=\"%s\",%d", body, bodyLen);
+  const auto PAYLOAD_SIZE = ID_SIZE + TIMESTAMP_SIZE + LAT_SIZE + LON_SIZE + SOG_SIZE + COG_SIZE + 6;
+  const auto COMMAND_SIZE = PAYLOAD_SIZE + 14;
 
+  char payload[PAYLOAD_SIZE];
+
+  snprintf(payload, PAYLOAD_SIZE, "%s,%s,%s,%s,%s,%s", id, 
+                                                       mGnssCache.mTimestamp, 
+                                                       mGnssCache.mLatitude, 
+                                                       mGnssCache.mLongitude, 
+                                                       mGnssCache.mSpeedOverGround, 
+                                                       mGnssCache.mCourseOverGround);
+
+  char command[COMMAND_SIZE];
+
+  snprintf(command, COMMAND_SIZE, "AT+SHBOD=\"%s\",%d", payload, strnlen(payload, PAYLOAD_SIZE));
+  
   sendCommand(command);
 
   return checkNextResponse("OK");

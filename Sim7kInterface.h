@@ -7,7 +7,7 @@
 #define SOG_SIZE 7
 #define COG_SIZE 7
 #define URL_LEN_LIMIT 65
-#define BODY_LEN_LIMIT 351
+#define ID_SIZE 2
 
 class HardwareSerial;
 
