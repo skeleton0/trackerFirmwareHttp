@@ -20,10 +20,9 @@ void setup() {
 }
 
 void loop() {
-  sim7k->activateNetwork(APN);
-
-  if (!sim7k->networkIsActive()) {
-    return;
+  while (!sim7k->networkIsActive()) {
+    sim7k->activateNetwork(APN);
+    delay(1000);
   }
 
   while (handlePositionUpdate()) {
@@ -36,30 +35,27 @@ bool handlePositionUpdate() {
       return true;
   }
   
-  bool sendUpdate{false};
-  
   if (millis() - timer > SITTING_UPDATE_FREQUENCY) {
     writeToLog(F("Sending position due to SITTING_UPDATE_FREQUENCY trigger."));
-    sendUpdate = true;
   }
   else if (millis() - timer > MOVING_UPDATE_FREQUENCY && sim7k->positionIsMoving()) {
     writeToLog(F("Sending position due to MOVING_UPDATE_FREQUENCY trigger."));
-    sendUpdate = true;
+  }
+  else
+  {
+    return true;
   }
 
-  if (sendUpdate) {
-    sim7k->startHttpsConn();
-    sim7k->setHttpsContentType();
-    sim7k->setHttpsBodyToGnssUpdate(DEVICE_ID);
-    
-    if (!sim7k->httpsIsConn() || !sim7k->sendHttpsPost("https://"SERVER_ADDR":"SERVER_PORT)) {
-      return false;
-    }
-    
-    timer = millis(); //reset timer
+  bool readyToSend = sim7k->httpsIsConn() || sim7k->startHttpsConn();
+
+  if (readyToSend && sim7k->setHttpsContentType() && sim7k->setHttpsBodyToGnssUpdate(DEVICE_ID)) {
+    //reset timer
+    timer = millis();
+    return true;
   }
 
-  return true;
+  writeToLog(F("Could not establish HTTPS connection."));
+  return false;
 }
 
 void writeToLog(const __FlashStringHelper* msg) {
