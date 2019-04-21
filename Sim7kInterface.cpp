@@ -416,7 +416,7 @@ bool Sim7kInterface::sendHttpsPost(const char* url) {
 
   sendCommand(command);
 
-  return checkNextResponse("OK") && checkNextResponse("+SHREQ: \"POST\",404,9", 30000);
+  return checkNextResponse("OK") && checkNextResponse("+SHREQ: \"POST\",200,0", 30000);
 }
 
 bool Sim7kInterface::setBearerApn(const char* apn) {
@@ -662,4 +662,3 @@ void Sim7kInterface::sendInitialSettings() {
   sendCommand("AT+CNMP=38");  //use LTE only
   sendCommand("AT+CMNB=1");   //use CAT-M only
 }
-
